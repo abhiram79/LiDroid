@@ -195,10 +195,10 @@ mkdir -p "$ROOTFS/etc/containers"
 cp /work/files/etc/containers/storage.conf "$ROOTFS/etc/containers/storage.conf"
 chmod 0644 "$ROOTFS/etc/containers/storage.conf"
 
-# Offline copy of the docs/guide site, staged into /work/docs-guide by
-# build_rootfs() in build-all.sh (this must run after the "Strip docs" rm -rf
-# above, or mksquashfs would ship nothing here). Served in-guest by
-# lidroid-docs.
+# Offline copy of the guide, generated from guide.conf by build-guide.sh and
+# staged into /work/docs-guide by build_rootfs() in build-all.sh (this must
+# run after the "Strip docs" rm -rf above, or mksquashfs would ship nothing
+# here). Served in-guest by lidroid-docs.
 mkdir -p "$ROOTFS/usr/share/doc/lidroid"
 cp /work/docs-guide/*.html /work/docs-guide/style.css "$ROOTFS/usr/share/doc/lidroid/"
 chmod 0644 "$ROOTFS/usr/share/doc/lidroid/"*

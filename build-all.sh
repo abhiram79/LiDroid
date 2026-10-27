@@ -124,11 +124,14 @@ build_rootfs() {
     local sysver
     sysver=$(grep -E '^[[:space:]]*versionCode[[:space:]]*=' "${SCRIPT_DIR}/app/build.gradle.kts" | grep -oE '[0-9]+' | head -1)
 
-    # docs/guide/ lives outside build-rootfs/, the Docker build context below,
-    # so stage a fresh copy inside it for Dockerfile.rootfs to COPY in.
+    # The in-guest guide is generated from the checked-in build-rootfs/guide.conf
+    # by build-guide.sh — there is no docs/ tree in this repo to copy. Output
+    # lands inside build-rootfs/ (the Docker build context below) for
+    # Dockerfile.rootfs to COPY in; lidroid-docs serves it in the guest.
     rm -rf "${SCRIPT_DIR}/build-rootfs/docs-guide"
-    mkdir -p "${SCRIPT_DIR}/build-rootfs/docs-guide"
-    cp "${SCRIPT_DIR}/docs/guide/"*.html "${SCRIPT_DIR}/docs/guide/style.css" "${SCRIPT_DIR}/build-rootfs/docs-guide/"
+    "${SCRIPT_DIR}/build-rootfs/build-guide.sh" \
+        "${SCRIPT_DIR}/build-rootfs/guide.conf" \
+        "${SCRIPT_DIR}/build-rootfs/docs-guide"
 
     docker build -f "${SCRIPT_DIR}/build-rootfs/Dockerfile.rootfs" \
         -t lidroid-rootfs:latest \
