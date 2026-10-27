@@ -2,8 +2,8 @@
  * LiDroid - Rootless Podman for Android
  * Copyright (C) 2024-2026 LiDroid contributors
  *
- * Launch splash: pure black canvas, "LiDroid" centered in white with a small
- * "linux on android" subheading. The wordmark springs in, holds, then fades
+ * Launch splash: pure black canvas with the "LiDroid" wordmark centered in
+ * white (no icon, no subheading). The wordmark springs in, holds, then fades
  * out and hands off to the home (or setup) entry — one uninterrupted motion
  * from the black system launch screen into the app.
  */
@@ -13,11 +13,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.text.font.FontWeight
 import com.abhiram.lidroid.ui.theme.LiDroidMotion
 import com.abhiram.lidroid.ui.theme.LiDroidTokens
 import com.abhiram.lidroid.ui.theme.LiDroidSplashBlack
@@ -41,7 +38,12 @@ private const val MIN_HOLD_MS = 1_600L
 
 @Composable
 fun SplashScreen(
-    setupKnown: Boolean,
+    // Provider lambda, not a plain Boolean: a Boolean parameter is captured
+    // by value inside the LaunchedEffect below, so the wait loop would never
+    // observe the state flip once the first emission lands and the app would
+    // hang on the splash forever. The lambda re-reads the latest state on
+    // every poll instead.
+    setupKnown: () -> Boolean,
     onDone: () -> Unit,
 ) {
     var contentVisible by remember { mutableStateOf(false) }
@@ -58,12 +60,6 @@ fun SplashScreen(
         animationSpec = tween(LiDroidMotion.Medium, easing = LiDroidMotion.Standard),
         label = "splash_title_alpha",
     )
-    // Subheading drifts up a beat later.
-    val subtitleAlpha by animateFloatAsState(
-        targetValue = if (contentVisible) 1f else 0f,
-        animationSpec = tween(LiDroidMotion.Slow, delayMillis = 250, easing = LiDroidMotion.Standard),
-        label = "splash_subtitle_alpha",
-    )
 
     // Whole-screen exit fade so the destination fades in over black, never a cut.
     val exitAlpha by animateFloatAsState(
@@ -78,7 +74,7 @@ fun SplashScreen(
         // destination is known (isSetupDone's first emission on the main
         // thread); waiting is invisible because the screen is already black.
         delay(MIN_HOLD_MS)
-        while (!setupKnown) delay(50)
+        while (!setupKnown()) delay(50)
         exiting = true
         delay(LiDroidMotion.Medium.toLong())
         onDone()
@@ -91,32 +87,18 @@ fun SplashScreen(
             .alpha(exitAlpha),
         contentAlignment = Alignment.Center,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                text = "LiDroid",
-                style = MaterialTheme.typography.displaySmall,
-                fontFamily = LiDroidTokens.ui(),
-                color = LiDroidSplashText,
-                modifier = Modifier
-                    .graphicsLayer {
-                        scaleX = titleScale
-                        scaleY = titleScale
-                        alpha = titleAlpha
-                    },
-            )
-            Spacer(Modifier.height(LiDroidTokens.Spacing.SM))
-            Text(
-                text = "linux on android",
-                style = MaterialTheme.typography.labelLarge,
-                fontFamily = LiDroidTokens.ui(),
-                color = LiDroidSplashText.copy(alpha = 0.6f),
-                modifier = Modifier
-                    .alpha(subtitleAlpha)
-                    .graphicsLayer { translationY = (1f - subtitleAlpha) * 8f },
-            )
-        }
+        Text(
+            text = "LiDroid",
+            style = MaterialTheme.typography.displaySmall,
+            fontFamily = LiDroidTokens.ui(),
+            fontWeight = FontWeight.Black,
+            color = LiDroidSplashText,
+            modifier = Modifier
+                .graphicsLayer {
+                    scaleX = titleScale
+                    scaleY = titleScale
+                    alpha = titleAlpha
+                },
+        )
     }
 }

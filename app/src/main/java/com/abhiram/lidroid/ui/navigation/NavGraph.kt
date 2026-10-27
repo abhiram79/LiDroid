@@ -109,7 +109,7 @@ fun LiDroidNavGraph(
     ) {
         composable(Routes.SPLASH) {
             SplashScreen(
-                setupKnown = isSetupDone != null,
+                setupKnown = { isSetupDone != null },
                 onDone = {
                     val destination = if (isSetupDone == true) Routes.HOME else Routes.SETUP
                     navController.navigate(destination) {

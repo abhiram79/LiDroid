@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Transparent stand-in for the system splash icon: Android 12+ always
+     renders a circular icon slot on the launch frame, so an empty oval keeps
+     it pure black with no launcher badge (the wordmark is drawn by Compose). -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval">
+    <solid android:color="@android:color/transparent" />
+    <size android:width="1dp" android:height="1dp" />
+</shape>
