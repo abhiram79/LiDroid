@@ -1,0 +1,29 @@
+#!/sbin/openrc-run
+description="LiDroid guest -> Android host bridge (notify/forward)"
+pidfile="/run/lidroid-hostd.pid"
+
+depend() {
+    need lidroid-bootstrap
+    before lidroid-ready
+}
+
+start() {
+    ebegin "Starting lidroid-hostd"
+    # OpenRC's own start-stop-daemon — Debian's sysvinit one lacks the
+    # --stdout/--stderr daemonization options used below.
+    /usr/lib/rc/sbin/start-stop-daemon --start --background \
+        --make-pidfile --pidfile "$pidfile" \
+        --stdout /var/log/lidroid-hostd.log \
+        --stderr /var/log/lidroid-hostd.log \
+        --exec /usr/local/bin/lidroid-hostd
+    eend $?
+}
+
+stop() {
+    if [ -f "$pidfile" ]; then
+        ebegin "Stopping lidroid-hostd"
+        /usr/lib/rc/sbin/start-stop-daemon --stop --pidfile "$pidfile"
+        rm -f "$pidfile"
+        eend $?
+    fi
+}

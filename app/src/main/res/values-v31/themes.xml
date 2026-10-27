@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Android 12+: system splash screen tuned to match the app's own splash
+         route (black canvas, Tux icon), so the launch sequence is one
+         uninterrupted dark frame. The wordmark itself is drawn by Compose. -->
+    <style name="Theme.LiDroid.Splash">
+        <item name="android:windowBackground">@color/splash_background</item>
+        <item name="android:windowSplashScreenBackground">@color/splash_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="android:windowSplashScreenAnimationDuration">400</item>
+    </style>
+</resources>

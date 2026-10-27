@@ -1,0 +1,54 @@
+#!/sbin/openrc-run
+description="LiDroid AVF Downloads share (9p over vsock, AVF only)"
+pidfile="/run/lidroid-downloads.pid"
+
+depend() {
+    need lidroid-bootstrap
+    after lidroid-network lidroid-vsock
+    before lidroid-ready
+}
+
+start() {
+    # AVF-only: QEMU's kernel has no AF_VSOCK and already gets its Downloads
+    # share via virtio-9p in lidroid-bootstrap. Skip cleanly via
+    # mark_service_inactive, same idiom lidroid-vsock uses.
+    if ! grep -q 'lidroid\.backend=avf' /proc/cmdline 2>/dev/null; then
+        einfo "Not an AVF boot - skipping lidroid-downloads"
+        mark_service_inactive
+        return 0
+    fi
+    mkdir -p /mnt/downloads 2>/dev/null
+    ebegin "Starting Downloads 9p rendezvous"
+    # OpenRC's own start-stop-daemon — Debian's sysvinit one lacks the
+    # --stdout/--stderr daemonization options used below.
+    /usr/lib/rc/sbin/start-stop-daemon --start --background \
+        --make-pidfile --pidfile "$pidfile" \
+        --stdout /var/log/lidroid-downloads.log \
+        --stderr /var/log/lidroid-downloads.log \
+        --exec /usr/local/bin/lidroid-vsock-agent -- downloads-9p
+    eend $?
+
+    # One-time cleanup of the stray container-count file an older LiDroid
+    # version wrote into the user's real Downloads dir (the guest host bridge's
+    # STATS push replaced it). Detached because the 9p mount above completes
+    # asynchronously once Android accepts the vsock rendezvous; rm -f is
+    # idempotent so giving up after the wait just leaves it for next boot.
+    ( _i=0
+      while [ "$_i" -lt 30 ] && ! mountpoint -q /mnt/downloads 2>/dev/null; do
+          sleep 1
+          _i=$((_i + 1))
+      done
+      rm -f /mnt/downloads/LiDroid/container-count 2>/dev/null
+    ) &
+}
+
+stop() {
+    if [ -f "$pidfile" ]; then
+        ebegin "Stopping Downloads 9p rendezvous"
+        /usr/lib/rc/sbin/start-stop-daemon --stop --pidfile "$pidfile"
+        rm -f "$pidfile"
+        eend $?
+    fi
+    umount /mnt/downloads 2>/dev/null || true
+    return 0
+}

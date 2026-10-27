@@ -1,0 +1,24 @@
+#!/sbin/openrc-run
+# shellcheck shell=sh
+description="Mounts local filesystems listed in /etc/fstab"
+
+# Debian's openrc package doesn't ship a localmount service (upstream Debian
+# normally runs systemd), but OpenRC's boot runlevel has one, and
+# lidroid-bootstrap `need`s it — a missing script would both stall the boot
+# and log "Service 'lidroid-bootstrap' needs non existent service" on every
+# boot. This is the stock OpenRC localmount scoped to what this guest
+# actually has: no fstab entries worth mounting (init-lidroid mounts /proc,
+# /sys and the ext4 persist disk before switch_root), plus the /run dirs the
+# lidroid services write their pidfiles into.
+depend() {
+    after fsck
+}
+
+start() {
+    ebegin "Mounting local filesystems"
+    if [ -r /etc/fstab ]; then
+        mount -a -t nonfs,nonfs4,nosmb,nocifs 2>/dev/null
+    fi
+    mkdir -p /run/lock 2>/dev/null
+    eend 0
+}

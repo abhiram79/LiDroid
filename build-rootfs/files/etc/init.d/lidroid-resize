@@ -1,0 +1,10 @@
+#!/sbin/openrc-run
+description="LiDroid terminal resize daemon (hvc1 → stty hvc0)"
+command="/usr/local/bin/lidroid-resize"
+command_background="yes"
+pidfile="/run/lidroid-resize.pid"
+
+depend() {
+    need lidroid-bootstrap
+    before lidroid-ready
+}

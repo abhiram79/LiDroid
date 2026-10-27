@@ -1,0 +1,66 @@
+#!/bin/sh
+# shellcheck shell=sh disable=SC2086
+# busybox udhcpc event hook. busybox udhcpc (invoked by lidroid-network with
+# no -s script) looks for this file; udhcpc exports the lease as environment
+# variables (interface, ip, subnet_mask, broadcast, router, dns, domain) and
+# passes the event ("bound"/"renew"/"deconfig") as $1.
+#
+# Uses iproute2 (`ip`) rather than net-tools ifconfig — net-tools is not
+# installed in this rootfs.
+
+[ -n "$1" ] || { echo "default.script: should be called from udhcpc" >&2; exit 1; }
+
+RESOLV_CONF=/etc/resolv.conf
+
+# dotted-quad netmask → prefix length (udhcpc does not pass CIDR)
+mask_to_prefix() {
+    _p=0
+    _old_ifs=$IFS
+    IFS=.
+    set -- $1
+    IFS=$_old_ifs
+    for _octet in "$@"; do
+        _set=0
+        while [ "$_octet" -gt 0 ]; do
+            _set=$((_set + _octet % 2))
+            _octet=$((_octet / 2))
+        done
+        _p=$((_p + _set))
+    done
+    echo "$_p"
+}
+
+case "$1" in
+    deconfig)
+        ip addr flush dev "$interface" 2>/dev/null
+        ip link set "$interface" up 2>/dev/null
+        ;;
+    bound|renew)
+        _prefix=$(mask_to_prefix "${subnet_mask:-255.255.255.0}")
+        if [ -n "$broadcast" ]; then
+            ip addr add "$ip/$_prefix" broadcast "$broadcast" dev "$interface" 2>/dev/null
+        else
+            ip addr add "$ip/$_prefix" dev "$interface" 2>/dev/null
+        fi
+        ip link set "$interface" up 2>/dev/null
+
+        while ip route del default 2>/dev/null; do :; done
+        if [ -n "$router" ]; then
+            for _gw in $router; do
+                ip route add default via "$_gw" dev "$interface" 2>/dev/null
+            done
+        fi
+
+        _resolv=/etc/resolv.conf.udhcpc
+        : > "$_resolv"
+        for _ns in $dns; do
+            echo "nameserver $_ns" >> "$_resolv"
+        done
+        if [ -s "$_resolv" ]; then
+            mv "$_resolv" "$RESOLV_CONF"
+        else
+            rm -f "$_resolv"
+        fi
+        ;;
+esac
+exit 0

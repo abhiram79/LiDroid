@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Dark-only: the launch window matches the Compose dark scheme. -->
+    <style name="Theme.LiDroid" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+
+    <!-- Splash: pure black window so the system → Compose splash hand-off
+         (LiDroid wordmark on #000000) is seamless. -->
+    <style name="Theme.LiDroid.Splash">
+        <item name="android:windowBackground">@color/splash_background</item>
+    </style>
+</resources>

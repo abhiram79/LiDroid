@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Matches LiDroidBackground (0xFF0D0C14) in ui/theme/Color.kt: the launch
+         window must not flash a color the dark-only scheme doesn't use. -->
+    <color name="window_background">#FF0D0C14</color>
+
+    <!-- Launch/splash surface: pure black behind the wordmark. -->
+    <color name="splash_background">#FF000000</color>
+
+    <!-- Adaptive-icon background: the cream sampled from the Tux artwork
+         (srgb 255,253,211). Must match the legacy icon fill exactly. -->
+    <color name="ic_launcher_background">#FFFDD3</color>
+</resources>
