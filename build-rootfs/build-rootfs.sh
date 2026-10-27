@@ -140,7 +140,6 @@ cp /work/files/usr/local/bin/lidroid-resize "$ROOTFS/usr/local/bin/"
 cp /work/files/usr/local/bin/lidroid-login  "$ROOTFS/usr/local/bin/"
 cp /work/files/usr/local/bin/lidroid-getty  "$ROOTFS/usr/local/bin/"
 cp /work/files/usr/local/bin/lidroid-backup "$ROOTFS/usr/local/bin/"
-cp /work/files/usr/local/bin/lidroid-docs   "$ROOTFS/usr/local/bin/"
 # lidroid-vsock-agent is COPY'd in from the vsock-builder Docker stage. Make
 # sure it's executable (cross-arch COPY can lose the mode bit on some buildkit
 # versions).
@@ -162,9 +161,9 @@ chmod +x "$ROOTFS/usr/local/bin/lidroid-"*
 mkdir -p "$ROOTFS/etc/lidroid"
 cp /work/files/etc/lidroid/forwards.conf "$ROOTFS/etc/lidroid/forwards.conf"
 chmod 0644 "$ROOTFS/etc/lidroid/forwards.conf"
-# Migration scripts dir (seeded with its README; per-version <v>.sh added over time).
+# Migration scripts dir (per-version <v>.sh added over time; lidroid-migrate
+# applies every pending script against /mnt/persist at boot).
 mkdir -p "$ROOTFS/etc/lidroid/migrations"
-cp /work/files/etc/lidroid/migrations/README "$ROOTFS/etc/lidroid/migrations/README"
 # Install every migration script so a new one needs no build-script edit.
 for f in /work/files/etc/lidroid/migrations/*.sh; do
     [ -f "$f" ] || continue
@@ -194,14 +193,6 @@ chmod 0644 "$ROOTFS/etc/profile.d/lidroid-color.sh" "$ROOTFS/etc/profile.d/lidro
 mkdir -p "$ROOTFS/etc/containers"
 cp /work/files/etc/containers/storage.conf "$ROOTFS/etc/containers/storage.conf"
 chmod 0644 "$ROOTFS/etc/containers/storage.conf"
-
-# Offline copy of the guide, generated from guide.conf by build-guide.sh and
-# staged into /work/docs-guide by build_rootfs() in build-all.sh (this must
-# run after the "Strip docs" rm -rf above, or mksquashfs would ship nothing
-# here). Served in-guest by lidroid-docs.
-mkdir -p "$ROOTFS/usr/share/doc/lidroid"
-cp /work/docs-guide/*.html /work/docs-guide/style.css "$ROOTFS/usr/share/doc/lidroid/"
-chmod 0644 "$ROOTFS/usr/share/doc/lidroid/"*
 
 # Hostname (read by lidroid-bootstrap via `hostname -F /etc/hostname`)
 echo "lidroid" > "$ROOTFS/etc/hostname"

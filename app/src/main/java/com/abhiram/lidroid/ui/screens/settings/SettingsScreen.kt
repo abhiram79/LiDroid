@@ -874,7 +874,7 @@ private fun AboutSection(
     val uriHandler = LocalUriHandler.current
     LiDroidGhostButton(
         text = stringResource(R.string.documentation),
-        onClick = { uriHandler.openUri("https://github.com/abhiramv79/LiDroid/guide/") },
+        onClick = { uriHandler.openUri("https://github.com/abhiramv79/LiDroid") },
     )
     Spacer(Modifier.height(LiDroidTokens.Spacing.SM))
     LiDroidGhostButton(

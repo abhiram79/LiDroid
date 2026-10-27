@@ -49,10 +49,6 @@ ENV SYSTEM_VERSION=${SYSTEM_VERSION}
 
 ENV DEBIAN_VERSION=${DEBIAN_SUITE}
 COPY files /work/files
-# Generated from guide.conf by build_rootfs() in build-all.sh (host-side
-# render — there is no docs/ tree in the repo); served in-guest by
-# /usr/local/bin/lidroid-docs.
-COPY docs-guide /work/docs-guide
 COPY build-rootfs.sh /work/build-rootfs.sh
 RUN chmod +x /work/build-rootfs.sh && /work/build-rootfs.sh
 

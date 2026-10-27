@@ -3,7 +3,7 @@
 # LiDroid Unified Build & Deploy Script
 # Coordinates kernel, initramfs, rootfs, QEMU, and APK builds.
 # (libtermux.so is no longer built here — the vendored terminal-emulator
-#  module compiles it via AGP's NDK build using src/main/jni/Android.mk.)
+#  module compiles it via AGP's NDK build, terminal-emulator/src/main/jni/Android.mk.)
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
 
@@ -124,15 +124,6 @@ build_rootfs() {
     local sysver
     sysver=$(grep -E '^[[:space:]]*versionCode[[:space:]]*=' "${SCRIPT_DIR}/app/build.gradle.kts" | grep -oE '[0-9]+' | head -1)
 
-    # The in-guest guide is generated from the checked-in build-rootfs/guide.conf
-    # by build-guide.sh — there is no docs/ tree in this repo to copy. Output
-    # lands inside build-rootfs/ (the Docker build context below) for
-    # Dockerfile.rootfs to COPY in; lidroid-docs serves it in the guest.
-    rm -rf "${SCRIPT_DIR}/build-rootfs/docs-guide"
-    "${SCRIPT_DIR}/build-rootfs/build-guide.sh" \
-        "${SCRIPT_DIR}/build-rootfs/guide.conf" \
-        "${SCRIPT_DIR}/build-rootfs/docs-guide"
-
     docker build -f "${SCRIPT_DIR}/build-rootfs/Dockerfile.rootfs" \
         -t lidroid-rootfs:latest \
         --build-arg "SYSTEM_VERSION=${sysver:-0}" \
@@ -201,7 +192,7 @@ run_boot_test() {
     log "Launching App..."
     adb shell am start -n "$pkg/$activity" >/dev/null 2>&1
     
-    echo -e "${YELLOW}>>> PLEASE PRESS 'Start Podman' IN THE APP NOW <<<${NC}"
+    echo -e "${YELLOW}>>> PLEASE PRESS 'Start VM' IN THE APP NOW <<<${NC}"
     
     # Poll console log
     log "Waiting for VM to boot (timeout: ${timeout}s)..."
