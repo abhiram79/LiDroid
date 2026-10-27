@@ -9,6 +9,8 @@
 package com.abhiram.lidroid.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -60,7 +62,7 @@ fun LiDroidBackIcon(onClick: () -> Unit, contentDescription: String) {
         ),
     ) {
         Icon(
-            androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+            Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = contentDescription,
         )
     }
