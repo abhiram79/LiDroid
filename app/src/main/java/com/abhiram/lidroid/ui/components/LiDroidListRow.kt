@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -94,7 +95,7 @@ fun LiDroidListRow(
                 modifier = Modifier.weight(1f, fill = false),
             )
             if (trailing != null) {
-                androidx.compose.foundation.layout.Spacer(Modifier.width(LiDroidTokens.Spacing.SM))
+                Spacer(Modifier.width(LiDroidTokens.Spacing.SM))
                 Text(
                     text = trailing,
                     style = MaterialTheme.typography.titleMedium,

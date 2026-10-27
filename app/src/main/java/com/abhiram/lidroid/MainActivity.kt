@@ -11,11 +11,13 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -51,7 +53,7 @@ class MainActivity : ComponentActivity() {
 
             // Server mode: near-zero window brightness + keep the screen on so the
             // app stays foreground (the VM is never backgrounded -> never killed).
-            androidx.compose.runtime.LaunchedEffect(headlessActive) {
+            LaunchedEffect(headlessActive) {
                 val lp = window.attributes
                 val bars = androidx.core.view.WindowInsetsControllerCompat(window, window.decorView)
                 val systemBars = androidx.core.view.WindowInsetsCompat.Type.systemBars()
@@ -87,7 +89,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background,
                 ) {
-                    androidx.compose.foundation.layout.Box(Modifier.fillMaxSize()) {
+                    Box(Modifier.fillMaxSize()) {
                         LiDroidNavGraph(windowSizeClass = windowSizeClass)
                         if (headlessActive) {
                             HeadlessOverlay(onExit = { headlessVm.disable() })
